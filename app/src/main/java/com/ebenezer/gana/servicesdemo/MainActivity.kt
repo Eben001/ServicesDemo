@@ -3,6 +3,7 @@ package com.ebenezer.gana.servicesdemo
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import com.ebenezer.gana.servicesdemo.MusicAction.*
 import com.ebenezer.gana.servicesdemo.MusicPlay.*
 import com.ebenezer.gana.servicesdemo.databinding.ActivityMainBinding
@@ -30,14 +31,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.playRingtone.setOnClickListener {
-            startService(PLAY_KEY, RINGTONE.name)
+            startForegroundService(PLAY_KEY, RINGTONE.name)
         }
         binding.playAlarm.setOnClickListener {
-            startService(PLAY_KEY, ALARM.name)
+            startForegroundService(PLAY_KEY, ALARM.name)
 
         }
         binding.stopPlaying.setOnClickListener {
-            startService(ACTION_KEY, STOP.name)
+            startForegroundService(ACTION_KEY, STOP.name)
 
         }
         binding.stopService.setOnClickListener {
@@ -45,8 +46,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startService(key: String, value: String) {
-        startService(Intent(this, MyService::class.java).apply {
+    private fun startForegroundService(key: String, value: String) {
+        ContextCompat.startForegroundService(this, Intent(this, MyService::class.java).apply {
             putExtra(key, value)
         })
     }

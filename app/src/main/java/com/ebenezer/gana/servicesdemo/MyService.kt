@@ -1,14 +1,59 @@
 package com.ebenezer.gana.servicesdemo
 
-import android.app.Service
+import android.app.*
+import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
+import android.os.Build
 import android.os.IBinder
 import android.provider.Settings
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+
+private const val CHANNEL_ID = "1000"
 
 class MyService:Service() {
 
     private var player:MediaPlayer? = null
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createChannel() {
+        val mNotificationManager = applicationContext
+            .getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val name:String = getString(R.string.app_name)
+        //The user-visible name of the channel
+        // The user-visible description of the channel
+        val description = "Service example notification channel"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val mChannel = NotificationChannel(CHANNEL_ID,
+            name, importance)
+
+        //Configure the notification channel
+        mChannel.description = description
+        mChannel.setShowBadge(false)
+        mChannel.lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        mNotificationManager.createNotificationChannel(mChannel)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        //API 26
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            createChannel()
+        }
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
+        0)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.my_service_running))
+            .setContentText(getString(R.string.app_name))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        //needs to be called within 5 seconds of call to foreground service
+        startForeground(1,notification)
+    }
 
     override fun onBind(intent: Intent?): IBinder? {
         //this is usually for bound services, we won't use this
