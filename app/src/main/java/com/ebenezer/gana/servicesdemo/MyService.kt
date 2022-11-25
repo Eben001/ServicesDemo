@@ -63,9 +63,12 @@ class MyService:Service() {
         //service runs in Main thread so for heavy work, offload to background thread
 
         if(intent?.extras?.containsKey(ACTION_KEY) == true){
-            val action = intent.getStringExtra(ACTION_KEY)?.let { MusicAction.valueOf(it) }
-            if(action == MusicAction.STOP){
+            val intentAction = intent.getStringExtra(ACTION_KEY)?.let { MusicAction.valueOf(it) }
+            if(intentAction == MusicAction.STOP){
                 player?.stop()
+                sendBroadcast(Intent().apply {
+                    action = ACTION_MUSIC_STOP_PLAYING
+                })
                 //services can be stopped by itself by calling stopSelf()
             }
         }else if(intent?.extras?.containsKey(PLAY_KEY) == true){
@@ -88,6 +91,9 @@ class MyService:Service() {
         player = MediaPlayer.create(this, uri).apply {
             isLooping = true
             start()
+            sendBroadcast(Intent().apply {
+                action = ACTION_MUSIC_PLAYING
+            })
         }
     }
 
